@@ -1,20 +1,7 @@
-import { getClockifyProject } from './hooks/clockify/getClockifyProject'
+import { Homepage } from './components/Home'
 
 function MainApp() {
-  return (
-    <div>
-      MainApp <br />
-      <button
-        onClick={async () => {
-          console.log('Button clicked!')
-          const va = await getClockifyProject()
-          console.log(va)
-        }}
-      >
-        hi
-      </button>
-    </div>
-  )
+  return <Homepage />
 }
 
 export default MainApp

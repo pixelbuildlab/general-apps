@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import MainApp from './MainApp'
 import TeamsClockify from './Pages/TeamsClockify'
+import { AuthForm } from './components/Auth'
 
 function Pages() {
   return (
@@ -8,6 +9,10 @@ function Pages() {
       <Route
         path='/'
         element={<MainApp />}
+      />
+      <Route
+        path='/auth'
+        element={<AuthForm />}
       />
       <Route
         path='/teams-clockify'

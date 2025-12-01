@@ -1,76 +1,101 @@
-import React from 'react'
-import { toast } from 'sonner'
-import { ClockifyForm, TimeEntriesDisplay } from '@/components/TeamsClockify'
-import { getClockifyProject } from '@/hooks/clockify/getClockifyProject'
-import { addClockifyLog } from '@/hooks/clockify/addClockifyLog'
-import { sendTeamsMessage } from '@/hooks/teams'
-import { generateTimeEntriesForDate } from '@/utils/clockify'
-import type { Project } from '@/types'
+import TeamsClockify from './Clockify'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { getConfig } from '@/utils/getConfig'
+import { useAppStore } from '@/store'
 
-function TeamsClockify() {
-  const [formData, setFormData] = React.useState<Record<
-    string,
-    unknown
-  > | null>(null)
-  const [projectInfo, setProjectInfo] = React.useState<Project | null>(null)
+function Page() {
+  const {
+    password,
+    workspaceId,
+    projectId,
+    apiKey,
+    protect,
+    setPassword,
+    setWorkspaceId,
+    setProjectId,
+    setApiKey,
+    setProtect,
+  } = useAppStore()
 
-  const handleSubmit = async (data: Record<string, unknown>) => {
-    if (formData) {
-      setFormData({ ...formData, ...data })
+  const handleClick = () => {
+    const pass = getConfig('VITE_APP_PASS')
+
+    if (!pass) {
+      throw new Error('App not configured')
+    }
+
+    if (pass === password) {
+      if (!workspaceId || !projectId || !apiKey) {
+        alert('Please enter Workspace ID, Project ID, and API Key')
+        return
+      }
+
+      setProtect(true)
     } else {
-      setFormData(data)
+      alert('Incorrect password')
     }
-    const response = await getClockifyProject()
-    if (response) {
-      setProjectInfo({
-        name: response.name,
-        id: response.id,
-        color: response.color,
-      })
-    } else {
-      console.error('Failed to fetch Clockify project info')
-    }
-  }
-
-  const timeEntries = React.useMemo(() => {
-    if (!formData?.date || !formData?.description || !formData?.time) {
-      return []
-    }
-    return generateTimeEntriesForDate(
-      formData?.date as string,
-      formData?.description as string,
-      formData?.time as string
-    )
-  }, [formData?.date, formData?.description, formData?.time])
-
-  const onAddClockifyLogs = async () => {
-    console.log('Add Clockify Logs')
-    await addClockifyLog(timeEntries)
-    toast('Clockify logs added successfully!')
-  }
-  const onSendTeamsUpdates = async () => {
-    if (formData?.description) {
-      await sendTeamsMessage(formData.description as string)
-    }
-    toast('Teams updates sent successfully!')
   }
 
   return (
-    <div className='min-h-screen bg-black flex items-center justify-center p-4'>
-      <div className='w-full max-w-2xl space-y-6'>
-        <ClockifyForm onSubmit={handleSubmit} />
-        {timeEntries.length > 0 && (
-          <TimeEntriesDisplay
-            entries={timeEntries}
-            selectedDate={formData?.date as string}
-            onAddClockifyLogs={onAddClockifyLogs}
-            onSendTeamsUpdates={onSendTeamsUpdates}
-            projectInfo={projectInfo}
-          />
-        )}
-      </div>
+    <div>
+      {!protect || !apiKey ? (
+        <div className='min-h-screen bg-black flex items-center justify-center p-4'>
+          <div className='w-full max-w-2xl space-y-4'>
+            <Input
+              id='password'
+              type='password'
+              placeholder='Enter password'
+              className='w-full pl-4 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-gray-600 focus:ring-gray-600'
+              value={password}
+              onChange={({ target }) => setPassword(target.value)}
+            />
+
+            <Input
+              id='workspaceId'
+              type='text'
+              placeholder='Workspace ID'
+              className='w-full pl-4 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-gray-600 focus:ring-gray-600'
+              value={workspaceId}
+              onChange={({ target }) => setWorkspaceId(target.value)}
+            />
+
+            <Input
+              id='projectId'
+              type='text'
+              placeholder='Project ID'
+              className='w-full pl-4 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-gray-600 focus:ring-gray-600'
+              value={projectId}
+              onChange={({ target }) => setProjectId(target.value)}
+            />
+
+            <Input
+              id='apiKey'
+              type='text'
+              placeholder='API Key'
+              className='w-full pl-4 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-gray-600 focus:ring-gray-600'
+              value={apiKey}
+              onChange={({ target }) => setApiKey(target.value)}
+            />
+
+            <Button
+              onClick={handleClick}
+              type='button'
+              className='w-full bg-white text-black hover:bg-gray-200 font-semibold py-2.5'
+            >
+              Submit
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <TeamsClockify
+        // workspaceId={workspaceId}
+        // projectId={projectId}
+        // apiKey={apiKey}
+        />
+      )}
     </div>
   )
 }
 
-export default TeamsClockify
+export default Page

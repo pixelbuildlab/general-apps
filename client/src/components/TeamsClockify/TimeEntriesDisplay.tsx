@@ -22,6 +22,7 @@ type TimeEntriesDisplayProps = {
   onAddClockifyLogs: () => void
   onSendTeamsUpdates: () => void
   projectInfo?: Project | null
+  addforDate: () => void
 }
 
 export function TimeEntriesDisplay({
@@ -30,6 +31,7 @@ export function TimeEntriesDisplay({
   onAddClockifyLogs,
   onSendTeamsUpdates,
   projectInfo,
+  addforDate,
 }: TimeEntriesDisplayProps) {
   const totalTime = calculateTotalHours(entries)
   const [isClockifyLogsAdded, setIsClockifyLogsAdded] = React.useState(false)
@@ -96,10 +98,22 @@ export function TimeEntriesDisplay({
         ))}
       </CardContent>
       <CardFooter className='flex justify-end gap-2 mt-4'>
+        {/* {isClockifyLogsAdded && ( */}
         <Button
           className='bg-white text-black hover:bg-gray-200 font-semibold cursor-pointer'
+          onClick={addforDate}
+          // disabled={isClockifyLogsAdded}
+          title={
+            isClockifyLogsAdded ? 'Logs already added' : 'Add Clockify Logs'
+          }
+        >
+          Add for date
+        </Button>
+        {/* )} */}
+        <Button
+          className='bg-white text-black hover:bg-gray-200 font-semibold cursor-pointer hidden'
           onClick={_onAddClockifyLogs}
-          disabled={isClockifyLogsAdded}
+          disabled={true}
           title={
             isClockifyLogsAdded ? 'Logs already added' : 'Add Clockify Logs'
           }
@@ -107,7 +121,7 @@ export function TimeEntriesDisplay({
           Add Clockify Logs
         </Button>
         <Button
-          className='bg-blue-600 text-white hover:bg-blue-700 font-semibold cursor-pointer'
+          className='bg-blue-600 text-white hover:bg-blue-700 font-semibold cursor-pointer hidden'
           onClick={_onSendTeamsUpdates}
           disabled={isTeamsUpdatesSent}
           title={

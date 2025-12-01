@@ -1,4 +1,4 @@
-import { getConfig } from '../getConfig'
+// import { getConfig } from '../getConfig'
 
 // export function generateTimeEntries(activities: string) {
 //   const timeEntries = []
@@ -52,8 +52,13 @@ import { getConfig } from '../getConfig'
 export function generateTimeEntriesForDate(
   dateStr: string,
   activities: string,
-  breakTimeStr: string // new arg, like "18:00"
+  breakTimeStr: string, // new arg, like "18:00"
+  projectId: string
 ) {
+  if (!projectId) {
+    throw new Error('Project Id missing')
+  }
+
   if (!activities.trim()) throw new Error('ACTIVITY REQUIRED')
 
   const timeEntries = []
@@ -66,8 +71,6 @@ export function generateTimeEntriesForDate(
   const [breakHour, breakMinute] = breakTimeStr.split(':').map(Number)
   const breakStart = new Date(yearNum, monthNum, dayNum, breakHour, breakMinute)
   const breakEnd = new Date(breakStart.getTime() + 60 * 60 * 1000)
-
-  const projectId = getConfig('VITE_PROJECT_ID')
 
   // First time entry: 3 PM to break start
   const startTime1 = new Date(yearNum, monthNum, dayNum, 15, 0)

@@ -10,54 +10,54 @@ import {
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
-import React from 'react'
 import { canAddLogForDate, isWeekend } from '@/utils/datetime'
 import { toast } from 'sonner'
 
 export function ClockifyForm({
   onSubmit,
+  formInputData,
+  handleValueChange,
 }: {
   onSubmit?: (data: Record<string, unknown>) => void
+  setFormInputData?: (date: Record<string, unknown>) => void //not used
+  formInputData: Record<string, unknown>
+  handleValueChange: (data: string, input: string) => void
 }) {
-  const [formData, setFormData] = React.useState<Record<string, unknown>>({
-    date: new Date().toISOString().split('T')[0],
-    time: '19:00', // default to 3PM
-  })
-
-  const handleValueChange = (fieldName: string, value: string) => {
-    if (fieldName === 'date' && isWeekend(value)) {
-      toast('Please select a week date.')
-    }
-    if (fieldName === 'date' && !canAddLogForDate(value)) {
-      toast('Cannot add log for this date. Please select a valid date.')
-    }
-    setFormData({
-      ...formData,
-      [fieldName]: value,
-    })
-  }
-
   const isTimeValid = (time: string) => {
     const [hours] = time.split(':').map(Number)
     return hours >= 15 && hours <= 23
   }
 
   const handleSubmit = () => {
-    if (!formData.time || !isTimeValid(formData.time as string)) {
+    if (!formInputData.time || !isTimeValid(formInputData.time as string)) {
       alert('Time must be between 3:00 PM and 11:00 PM.')
+
       return
     }
-    if (isWeekend(formData.date as string)) {
-      toast('Please select a week date, cannot log time on weekends.')
+    if (isWeekend(formInputData.date as string)) {
+      // toast('Please select a week date, cannot log time on weekends.')
+      const date = new Date(formInputData?.date as string)
+      date.setDate(date.getDate() + 1)
+      const nextDay = date.toISOString().split('T')[0]
+      // if (isWeekend(formData?.date as string)) {
+      toast('Skipping for weekends')
+      handleValueChange('date', nextDay)
+      // setFormData({ ...formData, date: nextDay })
+      // setform({ ...formInputData, date: nextDay })
+      // return
+      // }
+
+      // setFormData({ ...formData, date: nextDay })
+      // setFormInputData({ ...formInputData, date: nextDay })
       return
     }
-    if (!canAddLogForDate(formData.date as string)) {
+    if (!canAddLogForDate(formInputData.date as string)) {
       toast('Cannot add log for this date. Please select a valid date.')
       return
     }
 
-    if (onSubmit && formData) {
-      onSubmit(formData)
+    if (onSubmit && formInputData) {
+      onSubmit(formInputData)
     }
   }
 
@@ -104,7 +104,7 @@ export function ClockifyForm({
             <Input
               id='date'
               type='date'
-              defaultValue={formData.date as string}
+              value={formInputData.date as string}
               className='w-full bg-gray-800 border-gray-700 text-white focus:border-gray-600 focus:ring-gray-600 [&::-webkit-calendar-picker-indicator]:invert'
               required
               onChange={(e) => handleValueChange('date', e.target.value)}
@@ -121,7 +121,7 @@ export function ClockifyForm({
             <Input
               id='time'
               type='time'
-              value={formData.time as string}
+              value={formInputData.time as string}
               className='w-full bg-gray-800 border-gray-700 text-white focus:border-gray-600 focus:ring-gray-600'
               required
               onChange={(e) => handleValueChange('time', e.target.value)}
