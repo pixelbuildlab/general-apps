@@ -38,7 +38,6 @@ export const useAppStore = create<AppState>()(
       partialize: (state) => ({
         workspaceId: state.workspaceId,
         projectId: state.projectId,
-        protect: state.protect,
       }),
     }
   )
